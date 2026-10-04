@@ -1,0 +1,4 @@
+import {NextResponse} from "next/server";
+export async function POST(req:Request){const form=await req.formData();const file=form.get("file");if(!(file instanceof File))return NextResponse.json({error:"File audio wajib diunggah"},{status:400});const engine=process.env.AUDIO_ENGINE_URL;
+if(!engine)return NextResponse.json({stems:[],message:"AUDIO_ENGINE_URL belum dikonfigurasi. Jalankan server.py untuk mesin Demucs."});
+try{const body=new FormData();body.append("file",file);const r=await fetch(engine.replace(/\/$/,"")+"/api/separate",{method:"POST",body});if(!r.ok)throw new Error(await r.text());return NextResponse.json(await r.json())}catch{return NextResponse.json({error:"Mesin audio tidak dapat dihubungi."},{status:502})}}
