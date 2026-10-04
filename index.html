@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0c0c10" />
+  <title>Musika Studio — Buat, dengar, edit lagu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark">M</div><div><strong>Musika</strong><span>AI Music Studio</span></div></div>
+      <button id="newProjectBtn" class="primary wide">+ Proyek Baru</button>
+      <nav>
+        <button class="nav-item active" data-view="studio">Studio</button>
+        <button class="nav-item" data-view="projects">Proyek Saya</button>
+        <button class="nav-item" data-view="inspire">Inspirasi</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="status-dot-row"><span class="status-dot"></span> Mesin lokal siap</div>
+        <small>Tanpa API key untuk generator dasar</small>
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div>
+          <div class="eyebrow">PROYEK</div>
+          <input id="projectTitle" class="project-title" value="Lagu Baru" aria-label="Judul proyek">
+        </div>
+        <div class="top-actions">
+          <button id="saveBtn" class="ghost">Simpan</button>
+          <button id="exportBtn" class="ghost">Ekspor MIDI</button>
+          <button id="generateTopBtn" class="primary">Buat Musik</button>
+        </div>
+      </header>
+
+      <section class="workspace">
+        <div class="composer card">
+          <div class="card-heading">
+            <div><span class="pill">COMPOSER</span><h2>Ceritakan lagu yang kamu inginkan</h2></div>
+            <span id="autosaveLabel" class="muted">Tersimpan lokal</span>
+          </div>
+          <textarea id="prompt" placeholder="Contoh: piano ballad sendu tentang seseorang yang menyendiri di kamar saat hujan, perlahan menjadi penuh harapan...">Piano ballad sendu tentang seseorang yang menyendiri di kamar saat hujan, perlahan menjadi penuh harapan</textarea>
+
+          <div class="control-grid">
+            <label>Gaya
+              <select id="style">
+                <option value="ballad">Piano Ballad</option>
+                <option value="pop">Pop</option>
+                <option value="lofi">Lo-fi</option>
+                <option value="cinematic">Cinematic</option>
+                <option value="electronic">Electronic</option>
+              </select>
+            </label>
+            <label>Nuansa
+              <select id="mood">
+                <option value="sad">Sendu</option>
+                <option value="hopeful">Penuh Harapan</option>
+                <option value="dark">Gelap</option>
+                <option value="bright">Cerah</option>
+                <option value="dreamy">Dreamy</option>
+              </select>
+            </label>
+            <label>Kunci
+              <select id="key">
+                <option>C</option><option>C#</option><option>D</option><option>D#</option><option>E</option><option>F</option>
+                <option>F#</option><option>G</option><option>G#</option><option>A</option><option>A#</option><option>B</option>
+              </select>
+            </label>
+            <label>Skala
+              <select id="scale"><option value="minor">Minor</option><option value="major">Major</option></select>
+            </label>
+            <label>Tempo <span id="bpmValue">76</span> BPM
+              <input id="bpm" type="range" min="50" max="180" value="76">
+            </label>
+            <label>Panjang
+              <select id="bars"><option value="8">8 bar</option><option value="16" selected>16 bar</option><option value="32">32 bar</option></select>
+            </label>
+          </div>
+
+          <div class="generate-row">
+            <button id="generateBtn" class="generate">Buat Komposisi yang Bisa Diedit</button>
+            <span class="hint">Generator membuat chord, melody, bass, dan drum sebagai data editabel.</span>
+          </div>
+        </div>
+
+        <div class="transport card">
+          <div class="transport-main">
+            <button id="stopBtn" class="round">■</button>
+            <button id="playBtn" class="round play">▶</button>
+            <div><strong id="timeDisplay">00:00.0</strong><span> / <span id="durationDisplay">00:50</span></span></div>
+          </div>
+          <div class="transport-settings">
+            <label><span>Tempo</span><input id="transportBpm" type="number" value="76" min="40" max="220"></label>
+            <label><span>Master</span><input id="masterVolume" type="range" min="0" max="100" value="78"></label>
+          </div>
+        </div>
+
+        <div class="editor-layout">
+          <section class="arrangement card">
+            <div class="tabs">
+              <button class="tab active" data-tab="arrange">Arrangement</button>
+              <button class="tab" data-tab="piano">Piano Roll</button>
+              <button class="tab" data-tab="lyrics">Lirik</button>
+            </div>
+
+            <div id="arrangePanel" class="tab-panel active">
+              <div class="timeline-ruler" id="timelineRuler"></div>
+              <div id="tracks" class="tracks"></div>
+              <button id="addTrackBtn" class="add-track">+ Tambah Track</button>
+            </div>
+
+            <div id="pianoPanel" class="tab-panel">
+              <div class="piano-toolbar">
+                <span>Edit melodi langsung: klik sel untuk menambah/menghapus not</span>
+                <button id="regenerateMelodyBtn" class="ghost small">Variasi Melodi</button>
+              </div>
+              <div class="piano-roll-wrap">
+                <div id="pianoKeys" class="piano-keys"></div>
+                <div id="pianoGrid" class="piano-grid"></div>
+              </div>
+            </div>
+
+            <div id="lyricsPanel" class="tab-panel">
+              <div class="lyrics-grid">
+                <div>
+                  <div class="section-label">LIRIK EDITABEL</div>
+                  <textarea id="lyrics" class="lyrics-editor" placeholder="Tulis lirik di sini...">[Verse 1]
+Di balik jendela yang basah
+Kusimpan suara yang tak sempat bicara
+Lampu kamar menyala redup
+Malam memeluk tanpa menuntut
+
+[Chorus]
+Biar sepi duduk di sampingku
+Aku belajar mendengar diriku
+Dan jika pagi datang perlahan
+Kan kubuka pintu untuk harapan</textarea>
+                </div>
+                <div class="lyrics-tips">
+                  <h3>Struktur lagu</h3>
+                  <button data-section="[Intro]\n">+ Intro</button>
+                  <button data-section="[Verse]\n">+ Verse</button>
+                  <button data-section="[Pre-Chorus]\n">+ Pre-Chorus</button>
+                  <button data-section="[Chorus]\n">+ Chorus</button>
+                  <button data-section="[Bridge]\n">+ Bridge</button>
+                  <button data-section="[Outro]\n">+ Outro</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <aside class="inspector card">
+            <div class="section-label">INSPEKTOR</div>
+            <h3 id="inspectorTitle">Melody</h3>
+            <label>Instrumen
+              <select id="instrumentSelect">
+                <option value="piano">Grand Piano</option>
+                <option value="synth">Soft Synth</option>
+                <option value="pluck">Pluck</option>
+                <option value="bass">Bass</option>
+              </select>
+            </label>
+            <label>Volume <span id="trackVolumeValue">80%</span>
+              <input id="trackVolume" type="range" min="0" max="100" value="80">
+            </label>
+            <label>Pan
+              <input id="trackPan" type="range" min="-100" max="100" value="0">
+            </label>
+            <div class="chord-box">
+              <span>Progresi Chord</span>
+              <div id="chordProgression">Am · F · C · G</div>
+            </div>
+            <div class="note">
+              Semua bagian lagu disimpan sebagai struktur proyek. Generator tidak menghasilkan audio final yang terkunci.
+            </div>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <script src="https://unpkg.com/tone@14.8.49/build/Tone.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tonejs/midi@2.0.28/build/Midi.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
