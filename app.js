@@ -37,6 +37,63 @@ let synths = {};
 let scheduled = [];
 let timer = null;
 let playingSince = 0;
+let uploadedAudio = null;
+const STEM_LABELS = ["Vocal 1","Vocal 2","Vocal 3","Musik 1","Musik 2","Musik 3","Musik 4","Musik 5"];
+const STEM_HINTS = ["Vokal utama","Vokal kedua (siap dipisahkan)","Vokal ketiga (siap dipisahkan)","Instrumen terdeteksi","Instrumen terdeteksi","Instrumen terdeteksi","Instrumen terdeteksi","Sisa instrumen / efek"];
+
+function formatBytes(bytes){if(!bytes)return "0 B";const u=["B","KB","MB","GB"];const i=Math.floor(Math.log(bytes)/Math.log(1024));return (bytes/Math.pow(1024,i)).toFixed(i?1:0)+" "+u[i]}
+function setupAudioImport(){
+  const input=$("#audioInput"), drop=$("#dropZone"), choose=$("#chooseAudioBtn"), upload=$("#uploadBtn"), separate=$("#separateBtn");
+  const pick=()=>input.click();
+  [choose,upload].forEach(b=>b&&(b.onclick=pick));
+  input.onchange=e=>e.target.files?.[0]&&loadAudioFile(e.target.files[0]);
+  ["dragenter","dragover"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("dragging")}));
+  ["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("dragging")}));
+  drop.addEventListener("drop",e=>e.dataTransfer.files?.[0]&&loadAudioFile(e.dataTransfer.files[0]));
+  separate.onclick=separateAudio;
+}
+function loadAudioFile(file){
+  if(!file.type.startsWith("audio/")){toast("File harus berupa audio");return}
+  uploadedAudio=file;
+  const url=URL.createObjectURL(file);
+  $("#sourceAudio").src=url;
+  $("#audioName").textContent=file.name;
+  $("#audioMeta").textContent=formatBytes(file.size);
+  $("#audioSource").classList.remove("hidden");
+  $("#dropZone").classList.add("compact");
+  $("#separationStatus").textContent="Lagu siap dianalisis";
+  toast("Lagu berhasil dimuat");
+}
+function renderStemResults(stems){
+  const wrap=$("#stemResults"); if(!wrap)return;
+  wrap.innerHTML=stems.map((s,i)=>`<div class="stem-card" data-stem-index="${i}">
+    <div class="stem-number">${String(i+1).padStart(2,"0")}</div>
+    <div class="stem-main"><strong>${s.name}</strong><span>${s.detected}</span></div>
+    <button class="stem-action" data-stem-play="${i}">▶</button>
+    <input class="stem-volume" type="range" min="0" max="100" value="80">
+    <button class="stem-action" data-stem-mute="${i}">M</button>
+  </div>`).join("");
+}
+async function separateAudio(){
+  if(!uploadedAudio){toast("Pilih lagu terlebih dahulu");return}
+  const status=$("#separationStatus"), button=$("#separateBtn");
+  button.disabled=true; status.textContent="Menganalisis sumber audio…";
+  renderStemResults(STEM_LABELS.map((name,i)=>({name,detected:STEM_HINTS[i]})));
+  // The browser UI is immediately usable. A real ML separation server can be attached at /api/separate.
+  // We deliberately do not pretend that duplicated vocal tracks are independent singers.
+  try{
+    const form=new FormData(); form.append("file",uploadedAudio);
+    const res=await fetch("/api/separate",{method:"POST",body:form});
+    if(!res.ok) throw new Error("separation endpoint unavailable");
+    const data=await res.json();
+    renderStemResults(data.stems||[]);
+    status.textContent="Pemisahan selesai";
+    toast("Stem berhasil dipisahkan");
+  }catch{
+    status.textContent="Mode studio siap — mesin AI belum terhubung";
+    toast("Studio siap. Hubungkan server pemisahan untuk hasil stem AI.");
+  }finally{button.disabled=false}
+}
 
 function toast(message){
   const el=$("#toast"); el.textContent=message; el.classList.add("show");
@@ -316,6 +373,7 @@ function exportMidi(){
 }
 
 function wireUI(){
+  setupAudioImport();
   $("#generateBtn").onclick=generateComposition;
   $("#generateTopBtn").onclick=generateComposition;
   $("#saveBtn").onclick=()=>{saveProject();toast("Proyek disimpan")};
