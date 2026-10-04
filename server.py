@@ -69,3 +69,4 @@ async def separate(file: UploadFile = File(...)):
             })
 
     return {"job": job, "stems": stems}
+\n# Serve the studio itself after API routes so /api/* remains available.\napp.mount("/", StaticFiles(directory=ROOT, html=True), name="web")\n
