@@ -9,7 +9,6 @@ Jalankan `npm install` lalu `npm run dev`.
 Gunakan Python 3.11. Jalankan virtual environment, `pip install -r requirements.txt`, lalu `uvicorn server:app --reload --port 8000`. Buat `.env.local` berisi `AUDIO_ENGINE_URL=http://127.0.0.1:8000`.
 
 ## Fitur
-- PWA install ke layar utama HP
 - Upload MP3/WAV/M4A/OGG
 - Pemisahan Demucs 6-stem
 - Vocal 1–3 dan Musik 1–5
