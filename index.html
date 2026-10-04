@@ -34,12 +34,30 @@
         </div>
         <div class="top-actions">
           <button id="saveBtn" class="ghost">Simpan</button>
-          <button id="exportBtn" class="ghost">Ekspor MIDI</button>
+          <button id="uploadBtn" class="ghost">Upload Lagu</button><button id="exportBtn" class="ghost">Ekspor MIDI</button><input id="audioInput" type="file" accept="audio/*" hidden>
           <button id="generateTopBtn" class="primary">Buat Musik</button>
         </div>
       </header>
 
       <section class="workspace">
+        <div class="stem-import card">
+          <div class="card-heading">
+            <div><span class="pill">STEM STUDIO</span><h2>Pecah lagu menjadi bagian yang bisa diedit</h2></div>
+            <span id="separationStatus" class="muted">Belum ada lagu</span>
+          </div>
+          <div id="dropZone" class="drop-zone">
+            <div class="drop-icon">↥</div>
+            <div><strong>Tarik lagu ke sini</strong><span>atau pilih MP3, WAV, M4A, OGG</span></div>
+            <button id="chooseAudioBtn" class="ghost">Pilih Lagu</button>
+          </div>
+          <div id="audioSource" class="audio-source hidden">
+            <div><strong id="audioName">—</strong><span id="audioMeta">—</span></div>
+            <audio id="sourceAudio" controls></audio>
+            <button id="separateBtn" class="generate">Pecah Musik</button>
+          </div>
+          <div id="stemResults" class="stem-results"></div>
+        </div>
+
         <div class="composer card">
           <div class="card-heading">
             <div><span class="pill">COMPOSER</span><h2>Ceritakan lagu yang kamu inginkan</h2></div>
