@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+media/uploads/*
+media/stems/*
+!media/uploads/.gitkeep
+!media/stems/.gitkeep
