@@ -1,0 +1,3 @@
+"use client";
+import type {Stem} from "@/lib/stems/types";
+export default function StemTrack({stem,onChange,onSolo,onMute}:{stem:Stem;onChange:(v:number)=>void;onSolo:()=>void;onMute:()=>void}){return <div className="stem-row"><div className="stem-index">{stem.name.startsWith("Vocal")?"V":"M"}</div><div className="stem-info"><strong>{stem.name}</strong><span>{stem.detected}</span></div><button onClick={onMute} className={stem.muted?"active":""}>M</button><button onClick={onSolo} className={stem.solo?"active solo":""}>S</button><div className="wave"><i/><i/><i/><i/><i/><i/><i/><i/><i/><i/></div><input aria-label={stem.name+" volume"} type="range" min="0" max="100" value={stem.volume} onChange={e=>onChange(+e.target.value)}/></div>}
