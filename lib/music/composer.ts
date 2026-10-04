@@ -1,0 +1,3 @@
+export type Note={midi:number;time:number;duration:number;velocity:number};
+const scales={major:[0,2,4,5,7,9,11],minor:[0,2,3,5,7,8,10]};
+export function generateNotes(bars=16,key=0,scale:"major"|"minor"="minor"){const notes:Note[]=[];const s=scales[scale];for(let b=0;b<bars;b++){for(let i=0;i<4;i++){if(Math.random()<.72){const midi=key+60+s[Math.floor(Math.random()*s.length)];notes.push({midi,time:b*4+i,duration:.5,velocity:.65+Math.random()*.25})}}}return notes}
