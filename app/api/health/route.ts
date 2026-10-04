@@ -1,0 +1,1 @@
+import {NextResponse} from "next/server";export async function GET(){const engine=process.env.AUDIO_ENGINE_URL;if(!engine)return NextResponse.json({ok:false,connected:false});try{const r=await fetch(engine.replace(/\/$/,"")+"/api/health",{cache:"no-store"});return NextResponse.json({ok:r.ok,connected:r.ok})}catch{return NextResponse.json({ok:false,connected:false})}}
